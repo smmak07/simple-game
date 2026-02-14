@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Racing Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #222;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 10px;
+        }
+
+        #gameArea {
+            width: 400px;
+            height: 600px;
+            background: #555;
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+            border: 5px solid white;
+        }
+
+        .car {
+            width: 50px;
+            height: 100px;
+            background: red;
+            position: absolute;
+            bottom: 20px;
+            left: 175px;
+            border-radius: 10px;
+        }
+
+        .enemy {
+            width: 50px;
+            height: 100px;
+            background: yellow;
+            position: absolute;
+            top: -120px;
+            border-radius: 10px;
+        }
+
+        #score {
+            font-size: 20px;
+            margin: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🚗 Racing Game</h1>
+<div id="score">Score: 0</div>
+<button onclick="startGame()">Start Game</button>
+
+<div id="gameArea">
+    <div class="car" id="player"></div>
+</div>
+
+<script>
+    let player = document.getElementById("player");
+    let gameArea = document.getElementById("gameArea");
+    let scoreDisplay = document.getElementById("score");
+
+    let playerX = 175;
+    let speed = 5;
+    let score = 0;
+    let gameRunning = false;
+    let enemy;
+
+    document.addEventListener("keydown", moveCar);
+
+    function moveCar(e) {
+        if (!gameRunning) return;
+
+        if (e.key === "ArrowLeft" && playerX > 0) {
+            playerX -= 20;
+        }
+
+        if (e.key === "ArrowRight" && playerX < 350) {
+            playerX += 20;
+        }
+
+        player.style.left = playerX + "px";
+    }
+
+    function startGame() {
+        if (gameRunning) return;
+
+        gameRunning = true;
+        score = 0;
+        scoreDisplay.innerText = "Score: 0";
+
+        enemy = document.createElement("div");
+        enemy.classList.add("enemy");
+        enemy.style.left = Math.floor(Math.random() * 350) + "px";
+        gameArea.appendChild(enemy);
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function gameLoop() {
+        if (!gameRunning) return;
+
+        let enemyTop = parseInt(enemy.style.top || -120);
+        enemyTop += speed;
+        enemy.style.top = enemyTop + "px";
+
+        // Collision detection
+        if (
+            enemyTop > 480 &&
+            Math.abs(parseInt(enemy.style.left) - playerX) < 50
+        ) {
+            alert("Game Over! Final Score: " + score);
+            gameRunning = false;
+            enemy.remove();
+            return;
+        }
+
+        if (enemyTop > 600) {
+            enemyTop = -120;
+            enemy.style.left = Math.floor(Math.random() * 350) + "px";
+            score++;
+            scoreDisplay.innerText = "Score: " + score;
+        }
+
+        requestAnimationFrame(gameLoop);
+    }
+</script>
+
+</body>
+</html>
