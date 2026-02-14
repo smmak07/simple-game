@@ -1,234 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Street Racer Pro</title>
-
+<title>Canvas Racing Game</title>
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
-}
-
-body{
-    background: linear-gradient(to bottom,#111,#000);
-    overflow:hidden;
-    color:white;
-}
-
-#startScreen, #gameOverScreen{
-    position:absolute;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.9);
+  body {
+    margin: 0;
+    background: #222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: white;
+    font-family: Arial, sans-serif;
+  }
+  #gameCanvas {
+    background: #444;
+    border: 6px solid #fff;
+  }
+  #hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+  }
+  #startScreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right:0;
+    bottom:0;
     display:flex;
-    flex-direction:column;
+    background:rgba(0,0,0,0.8);
+    flex-direction: column;
     justify-content:center;
     align-items:center;
+    font-size:24px;
     z-index:10;
-}
-
-button{
-    padding:15px 30px;
-    font-size:18px;
-    background:#ff3c00;
-    border:none;
-    color:white;
-    cursor:pointer;
+  }
+  button {
+    padding: 12px 24px;
+    font-size: 20px;
     margin-top:20px;
-    border-radius:5px;
-    transition:0.3s;
-}
-
-button:hover{
-    background:#ff6a00;
-    transform:scale(1.05);
-}
-
-#gameArea{
-    width:400px;
-    height:100vh;
-    background:#333;
-    margin:auto;
-    position:relative;
-    overflow:hidden;
-    border-left:5px solid white;
-    border-right:5px solid white;
-}
-
-.roadLine{
-    width:10px;
-    height:100px;
-    background:white;
-    position:absolute;
-    left:195px;
-}
-
-.player{
-    width:60px;
-    height:120px;
-    background:red;
-    position:absolute;
-    bottom:30px;
-    left:170px;
-    border-radius:10px;
-}
-
-.enemy{
-    width:60px;
-    height:120px;
-    background:yellow;
-    position:absolute;
-    top:-150px;
-    border-radius:10px;
-}
-
-#scoreBoard{
-    position:absolute;
-    top:10px;
-    left:10px;
-    font-size:18px;
-}
+    cursor: pointer;
+  }
 </style>
 </head>
 
 <body>
 
 <div id="startScreen">
-    <h1>🏎 STREET RACER PRO</h1>
-    <button onclick="startGame()">Start Game</button>
+  <div>🚗 Canvas Racer</div>
+  <button onclick="startGame()">Start</button>
 </div>
 
-<div id="gameOverScreen" style="display:none;">
-    <h1>💀 GAME OVER</h1>
-    <h2 id="finalScore"></h2>
-    <button onclick="restartGame()">Play Again</button>
-</div>
-
-<div id="scoreBoard">Score: 0</div>
-
-<div id="gameArea">
-    <div class="player" id="player"></div>
-</div>
+<div id="hud">Score: 0 | Best: 0</div>
+<canvas id="gameCanvas" width="400" height="600"></canvas>
 
 <script>
 
-let gameArea = document.getElementById("gameArea");
-let player = document.getElementById("player");
-let scoreBoard = document.getElementById("scoreBoard");
-let finalScore = document.getElementById("finalScore");
+// Canvas setup
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-let keys = {ArrowLeft:false, ArrowRight:false};
-let playerX = 170;
-let speed = 5;
+const hud = document.getElementById("hud");
+const startScreen = document.getElementById("startScreen");
+
 let score = 0;
-let gameRunning = false;
+let bestScore = localStorage.getItem("bestScore") || 0;
+let gameOn = false;
 
+// Images
+const playerImg = new Image();
+playerImg.src = "car.png";
+
+const enemyImg = new Image();
+enemyImg.src = "enemy.png";
+
+// Player
+let player = { x: 170, y: 500, w: 60, h: 120, speed: 6 };
+
+// Enemies
+let enemies = [];
+const enemyCount = 3;
+
+// Control
+const keys = { ArrowLeft: false, ArrowRight: false };
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
 
-function startGame(){
-    document.getElementById("startScreen").style.display="none";
-    document.getElementById("gameOverScreen").style.display="none";
-    score=0;
-    speed=5;
-    scoreBoard.innerText="Score: 0";
-    playerX=170;
-    gameRunning=true;
-
-    createRoadLines();
-    createEnemies();
-
-    requestAnimationFrame(gameLoop);
+// Start
+function startGame() {
+  gameOn = true;
+  score = 0;
+  enemies = [];
+  startScreen.style.display = "none";
+  hud.innerText = `Score: ${score} | Best: ${bestScore}`;
+  for (let i = 0; i < enemyCount; i++) {
+    enemies.push(createEnemy());
+  }
+  requestAnimationFrame(gameLoop);
 }
 
-function restartGame(){
-    location.reload();
+// Create Enemy
+function createEnemy() {
+  return {
+    x: Math.random() * 340,
+    y: -Math.random() * 600 - 150,
+    w: 60,
+    h: 120,
+    speed: 4 + Math.random() * 3
+  };
 }
 
-function createRoadLines(){
-    for(let i=0;i<6;i++){
-        let line=document.createElement("div");
-        line.classList.add("roadLine");
-        line.y = i*150;
-        line.style.top=line.y+"px";
-        gameArea.appendChild(line);
+// Game Loop
+function gameLoop() {
+  if (!gameOn) return;
+  
+  // Clear
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Move player
+  if (keys.ArrowLeft && player.x > 0) player.x -= player.speed;
+  if (keys.ArrowRight && player.x < 340) player.x += player.speed;
+
+  // Draw player
+  ctx.drawImage(playerImg, player.x, player.y, player.w, player.h);
+
+  // Move & draw enemies
+  enemies.forEach((e, i) => {
+    e.y += e.speed;
+    ctx.drawImage(enemyImg, e.x, e.y, e.w, e.h);
+
+    if (e.y > canvas.height) {
+      enemies[i] = createEnemy();
+      score++;
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem("bestScore", bestScore);
+      }
     }
-}
 
-function createEnemies(){
-    for(let i=0;i<3;i++){
-        let enemy=document.createElement("div");
-        enemy.classList.add("enemy");
-        enemy.y = (i+1)*-300;
-        enemy.style.left=Math.floor(Math.random()*340)+"px";
-        enemy.style.top=enemy.y+"px";
-        gameArea.appendChild(enemy);
+    if (detectCollision(player, e)) {
+      gameOver();
     }
+  });
+
+  hud.innerText = `Score: ${score} | Best: ${bestScore}`;
+  requestAnimationFrame(gameLoop);
 }
 
-function moveRoadLines(){
-    let lines=document.querySelectorAll(".roadLine");
-    lines.forEach(line=>{
-        line.y+=speed;
-        if(line.y>=600) line.y=0;
-        line.style.top=line.y+"px";
-    });
+// Collision
+function detectCollision(a, b) {
+  return !(
+    a.y + a.h < b.y ||
+    a.y > b.y + b.h ||
+    a.x + a.w < b.x ||
+    a.x > b.x + b.w
+  );
 }
 
-function moveEnemies(){
-    let enemies=document.querySelectorAll(".enemy");
-    enemies.forEach(enemy=>{
-        enemy.y+=speed;
-
-        if(enemy.y>=600){
-            enemy.y=-300;
-            enemy.style.left=Math.floor(Math.random()*340)+"px";
-            score++;
-            speed+=0.2;
-            scoreBoard.innerText="Score: "+score;
-        }
-
-        if(isCollide(player,enemy)){
-            endGame();
-        }
-
-        enemy.style.top=enemy.y+"px";
-    });
-}
-
-function isCollide(a,b){
-    let aRect=a.getBoundingClientRect();
-    let bRect=b.getBoundingClientRect();
-    return !(
-        aRect.bottom<bRect.top ||
-        aRect.top>bRect.bottom ||
-        aRect.right<bRect.left ||
-        aRect.left>bRect.right
-    );
-}
-
-function gameLoop(){
-    if(!gameRunning) return;
-
-    moveRoadLines();
-    moveEnemies();
-
-    if(keys.ArrowLeft && playerX>0) playerX-=7;
-    if(keys.ArrowRight && playerX<340) playerX+=7;
-
-    player.style.left=playerX+"px";
-
-    requestAnimationFrame(gameLoop);
-}
-
-function endGame(){
-    gameRunning=false;
-    document.getElementById("gameOverScreen").style.display="flex";
-    finalScore.innerText="Your Score: "+score;
+// Game Over
+function gameOver() {
+  gameOn = false;
+  startScreen.innerHTML = `
+    🚗 Game Over<br><br>
+    Score: ${score}<br>
+    Best: ${bestScore}<br><br>
+    <button onclick="startGame()">Restart</button>`;
+  startScreen.style.display = "flex";
 }
 
 </script>
