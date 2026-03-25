@@ -92,8 +92,8 @@
 
     .track {
       position: relative;
-      width: min(94vw, 430px);
-      height: min(78vh, 760px);
+      width: min(98vw, 430px);
+      height: min(74vh, 700px);
       margin: 0 auto;
       overflow: hidden;
       border-radius: 28px;
@@ -103,6 +103,9 @@
         0 0 0 1px rgba(102,236,255,0.14),
         0 24px 60px rgba(0,0,0,0.42),
         0 0 45px rgba(102,236,255,0.1);
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .horizon-glow {
@@ -272,6 +275,25 @@
       color: rgba(255,255,255,0.66);
     }
 
+    .mobile-controls {
+      display: none;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .control-btn {
+      flex: 1;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.08);
+      color: var(--white);
+      border-radius: 16px;
+      padding: 14px 0;
+      font-size: 24px;
+      font-weight: 800;
+      backdrop-filter: blur(8px);
+      -webkit-tap-highlight-color: transparent;
+    }
+
     .paused-badge {
       position: absolute;
       top: 16px;
@@ -300,7 +322,13 @@
     .flash.show { opacity: 1; }
 
     @media (max-width: 520px) {
-      .card { min-width: 96px; }
+      .card { min-width: 88px; padding: 10px 12px; }
+      .value { font-size: 19px; }
+      .track { height: 70vh; width: 98vw; }
+      .panel { width: min(100%, 340px); padding: 24px 18px; }
+      .panel h1 { font-size: 30px; }
+      .mobile-controls { display: flex; }
+    }
       .value { font-size: 21px; }
       .track { height: 76vh; }
     }
@@ -331,7 +359,11 @@
             Dodge traffic, collect coins, and grab boosts. This version is rebuilt to avoid the blank-screen bug.
           </p>
           <button class="btn" id="startBtn">Start Game</button>
-          <div class="tips">Move with ← → or A D • Press P to pause • Tap left/right on mobile</div>
+          <div class="tips">Move with ← → or A D • Press P to pause • On phone, use the buttons below</div>
+          <div class="mobile-controls">
+            <button class="control-btn" id="leftBtn">◀</button>
+            <button class="control-btn" id="rightBtn">▶</button>
+          </div>
         </div>
       </div>
     </div>
@@ -349,6 +381,8 @@
       const laneDivider = document.getElementById('laneDivider');
       const pausedBadge = document.getElementById('pausedBadge');
       const flash = document.getElementById('flash');
+      const leftBtn = document.getElementById('leftBtn');
+      const rightBtn = document.getElementById('rightBtn');
 
       const lanes = [0.28, 0.5, 0.72];
       const objects = [];
@@ -359,8 +393,8 @@
       let paused = false;
       let score = 0;
       let best = Number(localStorage.getItem('turbo-highway-best') || 0);
-      let baseSpeed = 6;
-      let gameSpeed = 6;
+      let baseSpeed = 3;
+      let gameSpeed = 3;
       let roadOffset = 0;
       let spawnTick = 0;
       let coinTick = 0;
@@ -614,7 +648,7 @@
       function addScore(amount) {
         score += amount;
         scoreEl.textContent = String(score);
-        speedEl.textContent = Math.max(1, gameSpeed / 6).toFixed(1) + 'x';
+        speedEl.textContent = (gameSpeed / 6).toFixed(1) + 'x';
       }
 
       function flashDamage() {
@@ -650,8 +684,8 @@
         objects.length = 0;
         laneIndex = 1;
         score = 0;
-        baseSpeed = 6;
-        gameSpeed = 6;
+        baseSpeed = 3;
+        gameSpeed = 3;
         roadOffset = 0;
         spawnTick = 0;
         coinTick = 0;
@@ -660,7 +694,7 @@
         pausedBadge.classList.remove('show');
         overlay.style.display = 'none';
         scoreEl.textContent = '0';
-        speedEl.textContent = '1.0x';
+        speedEl.textContent = '0.5x';
         placePlayer();
         positionDashes();
         positionRoadLights();
@@ -684,9 +718,9 @@
         const delta = Math.min(1.8, (now - lastTime) / 16.6667);
         lastTime = now;
 
-        baseSpeed += 0.0024 * delta;
+        baseSpeed += 0.0006 * delta;
         gameSpeed += (baseSpeed - gameSpeed) * 0.02 * delta;
-        roadOffset += gameSpeed * delta * 7;
+        roadOffset += gameSpeed * delta * 3.4;
         positionDashes();
         positionRoadLights();
         addScore(Math.floor(delta));
@@ -695,15 +729,15 @@
         coinTick += delta;
         boostTick += delta;
 
-        if (spawnTick > Math.max(24, 52 - gameSpeed * 3.2)) {
+        if (spawnTick > Math.max(58, 120 - gameSpeed * 8)) {
           spawnEnemy();
           spawnTick = 0;
         }
-        if (coinTick > 78) {
+        if (coinTick > 95) {
           spawnCoin();
           coinTick = 0;
         }
-        if (boostTick > 220) {
+        if (boostTick > 150) {
           spawnBoost();
           boostTick = 0;
         }
@@ -712,7 +746,7 @@
 
         for (let i = objects.length - 1; i >= 0; i--) {
           const obj = objects[i];
-          const factor = obj.type === 'enemy' ? 0.0076 : obj.type === 'coin' ? 0.0061 : 0.0065;
+          const factor = obj.type === 'enemy' ? 0.0034 : obj.type === 'coin' ? 0.0030 : 0.0031;
           obj.t += gameSpeed * delta * factor;
           renderObject(obj);
 
@@ -735,7 +769,7 @@
               continue;
             }
             if (obj.type === 'boost') {
-              gameSpeed += 2.5;
+              gameSpeed += 0.8;
               addScore(10);
               removeObject(i);
               continue;
@@ -796,6 +830,19 @@
       positionRoadLights();
       placePlayer();
       startBtn.addEventListener('click', startGame);
+
+      function bindTouchControl(button, moveFn) {
+        if (!button) return;
+        const handler = function (e) {
+          e.preventDefault();
+          moveFn();
+        };
+        button.addEventListener('touchstart', handler, { passive: false });
+        button.addEventListener('click', handler);
+      }
+
+      bindTouchControl(leftBtn, moveLeft);
+      bindTouchControl(rightBtn, moveRight);
     });
   </script>
 </body>
