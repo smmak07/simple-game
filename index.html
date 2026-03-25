@@ -430,6 +430,7 @@
   </div>
 
   <script>
+document.addEventListener('DOMContentLoaded', () => {
     const track = document.getElementById('track');
     const player = document.getElementById('player');
     const scoreEl = document.getElementById('score');
@@ -503,6 +504,10 @@
       const t = 0.9;
       player.style.left = `${laneX(laneIndex, t, player.offsetWidth)}px`;
       player.style.top = `${roadCenterY(t) - player.offsetHeight / 2}px`;
+      const tilt = laneIndex === 0 ? -7 : laneIndex === 2 ? 7 : 0;
+      player.style.transform = `rotate(${tilt}deg)`;
+    }px`;
+      player.style.top = `${roadCenterY(t) - player.offsetHeight / 2}px`;
     }
 
     function createEnemyCar() {
@@ -542,7 +547,43 @@
             <rect x="89" y="110" width="13" height="38" rx="6" fill="#11141b"/>
             <path d="M28 20 L92 20 Q106 22 111 46 L114 124 Q113 145 96 156 L24 156 Q8 146 6 124 L9 46 Q14 22 28 20 Z" fill="url(#bodyRear)" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
             <path d="M39 36 L81 36 Q89 36 93 45 L96 84 Q95 92 87 96 L33 96 Q25 92 24 84 L27 45 Q31 36 39 36 Z" fill="url(#glassRear)"/>
-            <rect x="58" y="40" width="4" height="
+            <rect x="58" y="40" width="4" height="50" rx="2" fill="rgba(255,255,255,.18)"/>
+            <path d="M33 104 Q60 95 87 104 L84 130 Q60 136 36 130 Z" fill="rgba(255,255,255,.08)"/>
+            <rect x="34" y="132" width="52" height="14" rx="7" fill="url(#tailRear)"/>
+            <ellipse cx="60" cy="150" rx="24" ry="5" fill="rgba(0,0,0,.28)"/>
+          </svg>
+        `;
+      }
+      return `
+        <svg viewBox="0 0 120 170" width="100%" height="100%" aria-hidden="true">
+          <defs>
+            <linearGradient id="bodyFront" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffd4b5"/>
+              <stop offset="45%" stop-color="#ff7b7b"/>
+              <stop offset="100%" stop-color="#c32d5b"/>
+            </linearGradient>
+            <linearGradient id="glassFront" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1e2940"/>
+              <stop offset="100%" stop-color="#2e3d5a"/>
+            </linearGradient>
+            <linearGradient id="lightFront" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#fff7d6"/>
+              <stop offset="50%" stop-color="#ffd166"/>
+              <stop offset="100%" stop-color="#fff7d6"/>
+            </linearGradient>
+          </defs>
+          <rect x="11" y="44" width="13" height="42" rx="6" fill="#11141b"/>
+          <rect x="96" y="44" width="13" height="42" rx="6" fill="#11141b"/>
+          <rect x="18" y="110" width="13" height="38" rx="6" fill="#11141b"/>
+          <rect x="89" y="110" width="13" height="38" rx="6" fill="#11141b"/>
+          <path d="M29 8 L91 8 Q106 11 112 36 L114 118 Q111 145 91 162 L29 162 Q10 145 6 118 L8 36 Q14 11 29 8 Z" fill="url(#bodyFront)" stroke="rgba(255,255,255,.28)" stroke-width="2"/>
+          <path d="M37 28 L83 28 Q91 28 95 38 L96 84 Q95 93 86 98 L34 98 Q25 93 24 84 L25 38 Q29 28 37 28 Z" fill="url(#glassFront)"/>
+          <path d="M34 110 Q60 98 86 110 L80 144 Q60 150 40 144 Z" fill="rgba(255,255,255,.08)"/>
+          <rect x="36" y="140" width="48" height="11" rx="5.5" fill="url(#lightFront)"/>
+          <ellipse cx="60" cy="157" rx="25" ry="5" fill="rgba(0,0,0,.25)"/>
+        </svg>
+      `;
+    }
 
     function spawnEnemy() {
       const el = createEnemyCar();
@@ -766,10 +807,12 @@
       objects.forEach(renderObject);
     });
 
+    createPlayerCar();
     createDashes();
     positionDashes();
     placePlayer();
     startBtn.addEventListener('click', startGame);
+});
   </script>
 </body>
 </html>
