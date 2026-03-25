@@ -73,4 +73,730 @@
       border-radius: 18px;
       background: var(--panel);
       border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 12px 34px rgba(0,0,0,
+      box-shadow: 0 12px 34px rgba(0,0,0,0.28);
+      backdrop-filter: blur(10px);
+    }
+
+    .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .value {
+      margin-top: 6px;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .track {
+      position: relative;
+      width: min(94vw, 430px);
+      height: min(78vh, 760px);
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 28px;
+      border: 2px solid rgba(255,255,255,0.12);
+      background: linear-gradient(180deg, #14284a 0%, #0c1830 35%, #09111d 100%);
+      box-shadow:
+        0 0 0 1px rgba(102,236,255,0.14),
+        0 24px 60px rgba(0,0,0,0.42),
+        0 0 45px rgba(102,236,255,0.1);
+    }
+
+    .horizon-glow {
+      position: absolute;
+      left: 50%;
+      top: 40px;
+      transform: translateX(-50%);
+      width: 74%;
+      height: 90px;
+      background: radial-gradient(circle, rgba(102,236,255,0.17), transparent 68%);
+      filter: blur(18px);
+      z-index: 0;
+    }
+
+    .road {
+      position: absolute;
+      left: 50%;
+      bottom: -20px;
+      transform: translateX(-50%);
+      width: 79%;
+      height: 94%;
+      background: linear-gradient(180deg, #44526c 0%, #232d3f 18%, #151b24 100%);
+      clip-path: polygon(28% 0%, 72% 0%, 100% 100%, 0% 100%);
+      z-index: 1;
+      box-shadow: inset 0 0 46px rgba(255,255,255,0.04);
+    }
+
+    .road::before,
+    .road::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 10px;
+      background: linear-gradient(180deg, rgba(102,236,255,0.44), rgba(255,89,214,0.18));
+      opacity: 0.42;
+    }
+
+    .road::before { left: 11%; }
+    .road::after { right: 11%; }
+
+    .lane-divider {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .dash {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.18));
+      box-shadow: 0 0 12px rgba(255,255,255,0.28);
+    }
+
+    .road-light {
+      position: absolute;
+      z-index: 2;
+      width: 6px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.05));
+      box-shadow: 0 0 14px rgba(102,236,255,0.45);
+      opacity: 0.7;
+    }
+
+    .car {
+      position: absolute;
+      z-index: 5;
+      width: 92px;
+      height: 124px;
+      transition: left 0.12s ease-out, transform 0.12s ease-out;
+      filter: drop-shadow(0 16px 18px rgba(0,0,0,0.33));
+      transform-origin: center center;
+    }
+
+    .pickup {
+      position: absolute;
+      z-index: 4;
+    }
+
+    .coin {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #fff8c7, #ffd43b 58%, #ffb703 100%);
+      border: 2px solid rgba(255,255,255,0.28);
+      box-shadow: 0 0 16px rgba(255,212,59,0.58);
+      animation: coinSpin 0.9s linear infinite;
+    }
+
+    .boost {
+      width: 26px;
+      height: 40px;
+      clip-path: polygon(50% 0%, 100% 35%, 72% 100%, 28% 100%, 0 35%);
+      background: linear-gradient(180deg, #f3fbff, #7ce9ff 45%, #1c9fff);
+      box-shadow: 0 0 16px rgba(102,236,255,0.65);
+      animation: boostPulse 0.85s ease-in-out infinite alternate;
+    }
+
+    @keyframes coinSpin {
+      from { transform: rotateY(0deg); }
+      to { transform: rotateY(360deg); }
+    }
+
+    @keyframes boostPulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.12); }
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: linear-gradient(180deg, rgba(3,8,18,0.6), rgba(3,8,18,0.88));
+      text-align: center;
+    }
+
+    .panel {
+      width: min(100%, 360px);
+      padding: 28px 24px;
+      border-radius: 24px;
+      background: rgba(8, 16, 30, 0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 18px 45px rgba(0,0,0,0.34);
+    }
+
+    .panel h1 {
+      margin: 0;
+      font-size: 34px;
+    }
+
+    .panel p {
+      margin: 14px 0 0;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.82);
+    }
+
+    .accent {
+      background: linear-gradient(90deg, var(--cyan), var(--pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .btn {
+      margin-top: 18px;
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      color: #07121e;
+      background: linear-gradient(90deg, var(--cyan), #abf8ff 46%, var(--pink));
+      box-shadow: 0 10px 25px rgba(102,236,255,0.24);
+    }
+
+    .tips {
+      margin-top: 14px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.66);
+    }
+
+    .paused-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 9;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-size: 12px;
+      display: none;
+    }
+
+    .paused-badge.show { display: inline-flex; }
+
+    .flash {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,80,80,0.28);
+      opacity: 0;
+      z-index: 8;
+      transition: opacity 0.18s ease;
+      pointer-events: none;
+    }
+
+    .flash.show { opacity: 1; }
+
+    @media (max-width: 520px) {
+      .card { min-width: 96px; }
+      .value { font-size: 21px; }
+      .track { height: 76vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+
+  <div class="game-shell">
+    <div class="hud">
+      <div class="card"><div class="label">Score</div><div class="value" id="score">0</div></div>
+      <div class="card"><div class="label">Best</div><div class="value" id="best">0</div></div>
+      <div class="card"><div class="label">Speed</div><div class="value" id="speed">1.0x</div></div>
+    </div>
+
+    <div class="track" id="track">
+      <div class="horizon-glow"></div>
+      <div class="road"></div>
+      <div class="lane-divider" id="laneDivider"></div>
+      <div class="paused-badge" id="pausedBadge">Paused</div>
+      <div class="flash" id="flash"></div>
+      <div class="car" id="player"></div>
+
+      <div class="overlay" id="overlay">
+        <div class="panel">
+          <h1><span class="accent">Turbo</span> Highway GT</h1>
+          <p>
+            Dodge traffic, collect coins, and grab boosts. This version is rebuilt to avoid the blank-screen bug.
+          </p>
+          <button class="btn" id="startBtn">Start Game</button>
+          <div class="tips">Move with ← → or A D • Press P to pause • Tap left/right on mobile</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const track = document.getElementById('track');
+      const player = document.getElementById('player');
+      const scoreEl = document.getElementById('score');
+      const bestEl = document.getElementById('best');
+      const speedEl = document.getElementById('speed');
+      const overlay = document.getElementById('overlay');
+      const startBtn = document.getElementById('startBtn');
+      const laneDivider = document.getElementById('laneDivider');
+      const pausedBadge = document.getElementById('pausedBadge');
+      const flash = document.getElementById('flash');
+
+      const lanes = [0.28, 0.5, 0.72];
+      const objects = [];
+      const roadsideLights = [];
+
+      let laneIndex = 1;
+      let gameRunning = false;
+      let paused = false;
+      let score = 0;
+      let best = Number(localStorage.getItem('turbo-highway-best') || 0);
+      let baseSpeed = 6;
+      let gameSpeed = 6;
+      let roadOffset = 0;
+      let spawnTick = 0;
+      let coinTick = 0;
+      let boostTick = 0;
+      let frameId = null;
+      let lastTime = 0;
+
+      bestEl.textContent = best;
+      player.innerHTML = carSVG('rear', 'player');
+
+      function carSVG(view, mode) {
+        const bodyId = mode + '-' + view + '-body';
+        const glassId = mode + '-' + view + '-glass';
+        const lightId = mode + '-' + view + '-light';
+
+        if (view === 'rear') {
+          return `
+            <svg viewBox="0 0 120 170" width="100%" height="100%" aria-hidden="true">
+              <defs>
+                <linearGradient id="${bodyId}" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#9ef7ff"/>
+                  <stop offset="45%" stop-color="#32baff"/>
+                  <stop offset="100%" stop-color="#0f60d2"/>
+                </linearGradient>
+                <linearGradient id="${glassId}" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1b2940"/>
+                  <stop offset="100%" stop-color="#31425f"/>
+                </linearGradient>
+                <linearGradient id="${lightId}" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#ff49c3"/>
+                  <stop offset="50%" stop-color="#ffe066"/>
+                  <stop offset="100%" stop-color="#ff49c3"/>
+                </linearGradient>
+              </defs>
+              <rect x="11" y="44" width="13" height="42" rx="6" fill="#10141b"/>
+              <rect x="96" y="44" width="13" height="42" rx="6" fill="#10141b"/>
+              <rect x="18" y="110" width="13" height="38" rx="6" fill="#10141b"/>
+              <rect x="89" y="110" width="13" height="38" rx="6" fill="#10141b"/>
+              <path d="M28 20 L92 20 Q106 22 111 46 L114 124 Q113 145 96 156 L24 156 Q8 146 6 124 L9 46 Q14 22 28 20 Z" fill="url(#${bodyId})" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
+              <path d="M39 36 L81 36 Q89 36 93 45 L96 84 Q95 92 87 96 L33 96 Q25 92 24 84 L27 45 Q31 36 39 36 Z" fill="url(#${glassId})"/>
+              <rect x="58" y="40" width="4" height="50" rx="2" fill="rgba(255,255,255,.18)"/>
+              <path d="M33 104 Q60 95 87 104 L84 130 Q60 136 36 130 Z" fill="rgba(255,255,255,.08)"/>
+              <rect x="34" y="132" width="52" height="14" rx="7" fill="url(#${lightId})"/>
+            </svg>
+          `;
+        }
+
+        return `
+          <svg viewBox="0 0 120 170" width="100%" height="100%" aria-hidden="true">
+            <defs>
+              <linearGradient id="${bodyId}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffd5bb"/>
+                <stop offset="45%" stop-color="#ff7b7b"/>
+                <stop offset="100%" stop-color="#c52f5b"/>
+              </linearGradient>
+              <linearGradient id="${glassId}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1c2840"/>
+                <stop offset="100%" stop-color="#30405e"/>
+              </linearGradient>
+              <linearGradient id="${lightId}" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#fff7d8"/>
+                <stop offset="50%" stop-color="#ffd166"/>
+                <stop offset="100%" stop-color="#fff7d8"/>
+              </linearGradient>
+            </defs>
+            <rect x="11" y="44" width="13" height="42" rx="6" fill="#10141b"/>
+            <rect x="96" y="44" width="13" height="42" rx="6" fill="#10141b"/>
+            <rect x="18" y="110" width="13" height="38" rx="6" fill="#10141b"/>
+            <rect x="89" y="110" width="13" height="38" rx="6" fill="#10141b"/>
+            <path d="M29 8 L91 8 Q106 11 112 36 L114 118 Q111 145 91 162 L29 162 Q10 145 6 118 L8 36 Q14 11 29 8 Z" fill="url(#${bodyId})" stroke="rgba(255,255,255,.28)" stroke-width="2"/>
+            <path d="M37 28 L83 28 Q91 28 95 38 L96 84 Q95 93 86 98 L34 98 Q25 93 24 84 L25 38 Q29 28 37 28 Z" fill="url(#${glassId})"/>
+            <path d="M34 110 Q60 98 86 110 L80 144 Q60 150 40 144 Z" fill="rgba(255,255,255,.08)"/>
+            <rect x="36" y="140" width="48" height="11" rx="5.5" fill="url(#${lightId})"/>
+          </svg>
+        `;
+      }
+
+      function roadCenterY(t) {
+        return 70 + t * (track.clientHeight - 90);
+      }
+
+      function laneWidthAt(t) {
+        const top = track.clientWidth * 0.15;
+        const bottom = track.clientWidth * 0.25;
+        return top + (bottom - top) * t;
+      }
+
+      function laneX(index, t, width) {
+        const center = track.clientWidth / 2;
+        const spacing = laneWidthAt(t);
+        const laneCenter = center + (index - 1) * spacing;
+        return laneCenter - width / 2;
+      }
+
+      function createDashes() {
+        laneDivider.innerHTML = '';
+        for (let i = 0; i < 11; i++) {
+          const dash = document.createElement('div');
+          dash.className = 'dash';
+          laneDivider.appendChild(dash);
+        }
+      }
+
+      function positionDashes() {
+        const dashes = laneDivider.children;
+        for (let i = 0; i < dashes.length; i++) {
+          const dash = dashes[i];
+          const t = ((i * 110 + roadOffset) % 1100) / 1100;
+          const y = roadCenterY(t);
+          const scale = 0.35 + t * 1.15;
+          dash.style.top = y + 'px';
+          dash.style.width = 4 + t * 8 + 'px';
+          dash.style.height = 24 + t * 44 + 'px';
+          dash.style.opacity = String(0.35 + t * 0.5);
+          dash.style.transform = 'translateX(-50%) scale(' + scale + ')';
+        }
+      }
+
+      function createRoadLights() {
+        roadsideLights.forEach(function (l) { l.remove(); });
+        roadsideLights.length = 0;
+        for (let i = 0; i < 14; i++) {
+          const left = document.createElement('div');
+          const right = document.createElement('div');
+          left.className = 'road-light';
+          right.className = 'road-light';
+          track.appendChild(left);
+          track.appendChild(right);
+          roadsideLights.push(left, right);
+        }
+      }
+
+      function positionRoadLights() {
+        for (let i = 0; i < roadsideLights.length; i += 2) {
+          const idx = i / 2;
+          const t = ((idx * 80 + roadOffset * 1.25) % 1120) / 1120;
+          const y = roadCenterY(t);
+          const h = 18 + t * 42;
+          const leftX = track.clientWidth * (0.26 - t * 0.12);
+          const rightX = track.clientWidth * (0.74 + t * 0.12);
+          roadsideLights[i].style.left = leftX + 'px';
+          roadsideLights[i].style.top = y + 'px';
+          roadsideLights[i].style.height = h + 'px';
+          roadsideLights[i + 1].style.left = rightX + 'px';
+          roadsideLights[i + 1].style.top = y + 'px';
+          roadsideLights[i + 1].style.height = h + 'px';
+        }
+      }
+
+      function placePlayer() {
+        const t = 0.9;
+        player.style.left = laneX(laneIndex, t, player.offsetWidth) + 'px';
+        player.style.top = roadCenterY(t) - player.offsetHeight / 2 + 'px';
+        const tilt = laneIndex === 0 ? -7 : laneIndex === 2 ? 7 : 0;
+        player.style.transform = 'rotate(' + tilt + 'deg)';
+      }
+
+      function renderObject(obj) {
+        const scale = 0.48 + obj.t * 0.92;
+        const w = obj.baseW * scale;
+        const h = obj.baseH * scale;
+        obj.renderW = w;
+        obj.renderH = h;
+        obj.x = laneX(obj.lane, obj.t, w);
+        obj.y = roadCenterY(obj.t) - h / 2;
+        obj.el.style.left = obj.x + 'px';
+        obj.el.style.top = obj.y + 'px';
+        obj.el.style.width = w + 'px';
+        obj.el.style.height = h + 'px';
+      }
+
+      function spawnEnemy() {
+        const el = document.createElement('div');
+        el.className = 'car';
+        el.innerHTML = carSVG('front', 'enemy-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+        track.appendChild(el);
+        const item = {
+          type: 'enemy',
+          el: el,
+          lane: Math.floor(Math.random() * 3),
+          t: 0.05,
+          baseW: 90,
+          baseH: 118,
+          x: 0,
+          y: 0,
+          renderW: 0,
+          renderH: 0
+        };
+        objects.push(item);
+        renderObject(item);
+      }
+
+      function spawnCoin() {
+        const el = document.createElement('div');
+        el.className = 'pickup coin';
+        track.appendChild(el);
+        const item = {
+          type: 'coin',
+          el: el,
+          lane: Math.floor(Math.random() * 3),
+          t: 0.08,
+          baseW: 26,
+          baseH: 26,
+          x: 0,
+          y: 0,
+          renderW: 0,
+          renderH: 0
+        };
+        objects.push(item);
+        renderObject(item);
+      }
+
+      function spawnBoost() {
+        const el = document.createElement('div');
+        el.className = 'pickup boost';
+        track.appendChild(el);
+        const item = {
+          type: 'boost',
+          el: el,
+          lane: Math.floor(Math.random() * 3),
+          t: 0.09,
+          baseW: 26,
+          baseH: 40,
+          x: 0,
+          y: 0,
+          renderW: 0,
+          renderH: 0
+        };
+        objects.push(item);
+        renderObject(item);
+      }
+
+      function removeObject(index) {
+        objects[index].el.remove();
+        objects.splice(index, 1);
+      }
+
+      function intersects(a, b) {
+        return !(a.x + a.w < b.x || a.x > b.x + b.w || a.y + a.h < b.y || a.y > b.y + b.h);
+      }
+
+      function getPlayerBox() {
+        return {
+          x: player.offsetLeft + 16,
+          y: player.offsetTop + 12,
+          w: player.offsetWidth - 32,
+          h: player.offsetHeight - 16
+        };
+      }
+
+      function addScore(amount) {
+        score += amount;
+        scoreEl.textContent = String(score);
+        speedEl.textContent = Math.max(1, gameSpeed / 6).toFixed(1) + 'x';
+      }
+
+      function flashDamage() {
+        flash.classList.add('show');
+        setTimeout(function () {
+          flash.classList.remove('show');
+        }, 120);
+      }
+
+      function endGame() {
+        gameRunning = false;
+        cancelAnimationFrame(frameId);
+        if (score > best) {
+          best = score;
+          localStorage.setItem('turbo-highway-best', String(best));
+          bestEl.textContent = String(best);
+        }
+        overlay.innerHTML = '' +
+          '<div class="panel">' +
+          '<h1>Game Over</h1>' +
+          '<p>Your score: <strong>' + score + '</strong><br>Best score: <strong>' + best + '</strong></p>' +
+          '<button class="btn" id="restartBtn">Play Again</button>' +
+          '<div class="tips">Coins give +5 • Boosts give +10 and extra speed</div>' +
+          '</div>';
+        overlay.style.display = 'grid';
+        document.getElementById('restartBtn').addEventListener('click', startGame);
+      }
+
+      function resetGame() {
+        for (let i = objects.length - 1; i >= 0; i--) {
+          objects[i].el.remove();
+        }
+        objects.length = 0;
+        laneIndex = 1;
+        score = 0;
+        baseSpeed = 6;
+        gameSpeed = 6;
+        roadOffset = 0;
+        spawnTick = 0;
+        coinTick = 0;
+        boostTick = 0;
+        paused = false;
+        pausedBadge.classList.remove('show');
+        overlay.style.display = 'none';
+        scoreEl.textContent = '0';
+        speedEl.textContent = '1.0x';
+        placePlayer();
+        positionDashes();
+        positionRoadLights();
+      }
+
+      function startGame() {
+        resetGame();
+        gameRunning = true;
+        lastTime = performance.now();
+        frameId = requestAnimationFrame(loop);
+      }
+
+      function loop(now) {
+        if (!gameRunning) return;
+        frameId = requestAnimationFrame(loop);
+        if (paused) {
+          lastTime = now;
+          return;
+        }
+
+        const delta = Math.min(1.8, (now - lastTime) / 16.6667);
+        lastTime = now;
+
+        baseSpeed += 0.0024 * delta;
+        gameSpeed += (baseSpeed - gameSpeed) * 0.02 * delta;
+        roadOffset += gameSpeed * delta * 7;
+        positionDashes();
+        positionRoadLights();
+        addScore(Math.floor(delta));
+
+        spawnTick += delta;
+        coinTick += delta;
+        boostTick += delta;
+
+        if (spawnTick > Math.max(24, 52 - gameSpeed * 3.2)) {
+          spawnEnemy();
+          spawnTick = 0;
+        }
+        if (coinTick > 78) {
+          spawnCoin();
+          coinTick = 0;
+        }
+        if (boostTick > 220) {
+          spawnBoost();
+          boostTick = 0;
+        }
+
+        const playerBox = getPlayerBox();
+
+        for (let i = objects.length - 1; i >= 0; i--) {
+          const obj = objects[i];
+          const factor = obj.type === 'enemy' ? 0.0076 : obj.type === 'coin' ? 0.0061 : 0.0065;
+          obj.t += gameSpeed * delta * factor;
+          renderObject(obj);
+
+          const box = {
+            x: obj.x + 8,
+            y: obj.y + 8,
+            w: obj.renderW - 16,
+            h: obj.renderH - 14
+          };
+
+          if (intersects(playerBox, box)) {
+            if (obj.type === 'enemy') {
+              flashDamage();
+              endGame();
+              return;
+            }
+            if (obj.type === 'coin') {
+              addScore(5);
+              removeObject(i);
+              continue;
+            }
+            if (obj.type === 'boost') {
+              gameSpeed += 2.5;
+              addScore(10);
+              removeObject(i);
+              continue;
+            }
+          }
+
+          if (obj.t > 1.08) {
+            removeObject(i);
+          }
+        }
+      }
+
+      function moveLeft() {
+        if (!gameRunning || paused) return;
+        laneIndex = Math.max(0, laneIndex - 1);
+        placePlayer();
+      }
+
+      function moveRight() {
+        if (!gameRunning || paused) return;
+        laneIndex = Math.min(2, laneIndex + 1);
+        placePlayer();
+      }
+
+      document.addEventListener('keydown', function (e) {
+        const key = e.key.toLowerCase();
+        if (key === 'arrowleft' || key === 'a') moveLeft();
+        if (key === 'arrowright' || key === 'd') moveRight();
+        if (key === 'p' && gameRunning) {
+          paused = !paused;
+          pausedBadge.classList.toggle('show', paused);
+        }
+        if (key === 'enter' && !gameRunning && overlay.style.display !== 'none') {
+          startGame();
+        }
+      });
+
+      track.addEventListener('click', function (e) {
+        if (!gameRunning || paused) return;
+        const rect = track.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        if (x < rect.width / 2) moveLeft();
+        else moveRight();
+      });
+
+      window.addEventListener('resize', function () {
+        placePlayer();
+        positionDashes();
+        positionRoadLights();
+        for (let i = 0; i < objects.length; i++) {
+          renderObject(objects[i]);
+        }
+      });
+
+      createDashes();
+      createRoadLights();
+      positionDashes();
+      positionRoadLights();
+      placePlayer();
+      startBtn.addEventListener('click', startGame);
+    });
+  </script>
+</body>
+</html>
