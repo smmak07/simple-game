@@ -1,179 +1,719 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Canvas Racing Game</title>
-<style>
-  body {
-    margin: 0;
-    background: #222;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    color: white;
-    font-family: Arial, sans-serif;
-  }
-  #gameCanvas {
-    background: #444;
-    border: 6px solid #fff;
-  }
-  #hud {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 20px;
-  }
-  #startScreen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right:0;
-    bottom:0;
-    display:flex;
-    background:rgba(0,0,0,0.8);
-    flex-direction: column;
-    justify-content:center;
-    align-items:center;
-    font-size:24px;
-    z-index:10;
-  }
-  button {
-    padding: 12px 24px;
-    font-size: 20px;
-    margin-top:20px;
-    cursor: pointer;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neon Lane Runner</title>
+  <style>
+    :root {
+      --bg1: #08111f;
+      --bg2: #0f1d33;
+      --panel: rgba(11, 19, 33, 0.78);
+      --cyan: #55e7ff;
+      --pink: #ff4fd8;
+      --yellow: #ffe066;
+      --white: #f3f7ff;
+      --danger: #ff6b6b;
+      --road: #182234;
+      --lane: rgba(255,255,255,0.8);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--white);
+      background:
+        radial-gradient(circle at top, rgba(85, 231, 255, 0.12), transparent 28%),
+        radial-gradient(circle at bottom, rgba(255, 79, 216, 0.1), transparent 32%),
+        linear-gradient(180deg, var(--bg2), var(--bg1));
+    }
+
+    .stars,
+    .stars::before,
+    .stars::after {
+      position: fixed;
+      inset: 0;
+      content: "";
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1.5px);
+      background-size: 140px 140px;
+      animation: drift 22s linear infinite;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    .stars::before {
+      background-size: 200px 200px;
+      animation-duration: 32s;
+      opacity: 0.1;
+    }
+
+    .stars::after {
+      background-size: 90px 90px;
+      animation-duration: 16s;
+      opacity: 0.12;
+    }
+
+    @keyframes drift {
+      from { transform: translateY(0); }
+      to { transform: translateY(140px); }
+    }
+
+    .game-shell {
+      position: relative;
+      width: min(92vw, 420px);
+    }
+
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .card {
+      flex: 1;
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 12px 14px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+    }
+
+    .label {
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .value {
+      margin-top: 6px;
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    .track {
+      position: relative;
+      width: 100%;
+      height: min(76vh, 720px);
+      overflow: hidden;
+      border-radius: 26px;
+      border: 3px solid rgba(255,255,255,0.18);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)),
+        linear-gradient(180deg, #243248 0%, #162235 100%);
+      box-shadow:
+        0 0 0 1px rgba(85, 231, 255, 0.15),
+        0 28px 60px rgba(0, 0, 0, 0.5),
+        0 0 35px rgba(85, 231, 255, 0.12);
+    }
+
+    .track::before,
+    .track::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 24px;
+      background: linear-gradient(180deg, rgba(85,231,255,0.4), rgba(255,79,216,0.18));
+      opacity: 0.35;
+      z-index: 2;
+    }
+
+    .track::before { left: 0; }
+    .track::after { right: 0; }
+
+    .lane-divider {
+      position: absolute;
+      top: 0;
+      width: 8px;
+      height: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      opacity: 0.75;
+    }
+
+    .dash {
+      position: absolute;
+      left: 50%;
+      width: 8px;
+      height: 72px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.2));
+      border-radius: 999px;
+      box-shadow: 0 0 12px rgba(255,255,255,0.35);
+    }
+
+    .car {
+      position: absolute;
+      bottom: 24px;
+      width: 78px;
+      height: 132px;
+      z-index: 4;
+      transition: left 0.11s ease-out;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.4));
+    }
+
+    .car-body {
+      position: absolute;
+      inset: 12px 10px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #66f0ff 0%, #2db4ff 60%, #0b6fd7 100%);
+      box-shadow:
+        inset 0 0 0 2px rgba(255,255,255,0.25),
+        inset 0 -10px 18px rgba(0,0,0,0.2),
+        0 0 16px rgba(85,231,255,0.35);
+    }
+
+    .car-body::before {
+      content: "";
+      position: absolute;
+      inset: 14px 14px 40px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #1d2943, #29344d);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.08);
+    }
+
+    .car-body::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 10px;
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--pink), var(--yellow), var(--pink));
+      box-shadow: 0 0 12px rgba(255,79,216,0.6);
+    }
+
+    .wheel {
+      position: absolute;
+      width: 15px;
+      height: 28px;
+      background: #101217;
+      border-radius: 8px;
+      top: 20px;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.06);
+    }
+    .wheel.w1 { left: 0; }
+    .wheel.w2 { right: 0; }
+    .wheel.w3 { left: 0; bottom: 18px; top: auto; }
+    .wheel.w4 { right: 0; bottom: 18px; top: auto; }
+
+    .enemy, .coin, .boost {
+      position: absolute;
+      z-index: 3;
+      transform: translateZ(0);
+    }
+
+    .enemy {
+      width: 76px;
+      height: 128px;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,0.4));
+    }
+
+    .enemy .shape {
+      position: absolute;
+      inset: 10px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #ff8a70, #ff496c 60%, #b5173e);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.18);
+    }
+
+    .enemy .shape::before {
+      content: "";
+      position: absolute;
+      inset: 14px 14px 38px;
+      border-radius: 15px;
+      background: linear-gradient(180deg, #261b2f, #3b263a);
+    }
+
+    .enemy .shape::after {
+      content: "";
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ffd166, #fff3bf, #ffd166);
+    }
+
+    .coin {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #fff7b0, #ffd43b 55%, #ffb703 100%);
+      box-shadow: 0 0 18px rgba(255, 212, 59, 0.55);
+      border: 2px solid rgba(255,255,255,0.35);
+      animation: spin 0.9s linear infinite;
+    }
+
+    .boost {
+      width: 30px;
+      height: 46px;
+      background: linear-gradient(180deg, #e0f7ff, #7ce8ff 45%, #27b6ff);
+      clip-path: polygon(50% 0%, 100% 32%, 72% 100%, 28% 100%, 0% 32%);
+      box-shadow: 0 0 16px rgba(85,231,255,0.65);
+      animation: pulse 0.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes spin {
+      from { transform: rotateY(0deg); }
+      to { transform: rotateY(360deg); }
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.12); }
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: linear-gradient(180deg, rgba(3,8,18,0.72), rgba(3,8,18,0.88));
+      text-align: center;
+    }
+
+    .panel {
+      width: min(100%, 330px);
+      padding: 26px 22px;
+      border-radius: 24px;
+      background: rgba(8, 15, 28, 0.84);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+    }
+
+    .panel h1 {
+      margin: 0;
+      font-size: 34px;
+      letter-spacing: 1px;
+    }
+
+    .panel p {
+      line-height: 1.5;
+      color: rgba(255,255,255,0.82);
+      margin: 14px 0 0;
+    }
+
+    .accent {
+      background: linear-gradient(90deg, var(--cyan), var(--pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .btn {
+      margin-top: 18px;
+      border: none;
+      color: #04111d;
+      font-weight: 800;
+      font-size: 16px;
+      padding: 14px 18px;
+      width: 100%;
+      border-radius: 14px;
+      background: linear-gradient(90deg, var(--cyan), #88f5ff 45%, var(--pink));
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(85,231,255,0.25);
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .tips {
+      margin-top: 14px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.68);
+    }
+
+    .flash {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 90, 90, 0.26);
+      z-index: 7;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease;
+    }
+
+    .flash.show { opacity: 1; }
+
+    .paused-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 6;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.14);
+      font-size: 12px;
+      display: none;
+    }
+
+    .show { display: inline-flex; }
+
+    @media (max-width: 520px) {
+      .value { font-size: 21px; }
+      .track { height: 72vh; }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="stars"></div>
 
-<div id="startScreen">
-  <div>🚗 Canvas Racer</div>
-  <button onclick="startGame()">Start</button>
-</div>
+  <div class="game-shell">
+    <div class="hud">
+      <div class="card">
+        <div class="label">Score</div>
+        <div class="value" id="score">0</div>
+      </div>
+      <div class="card">
+        <div class="label">Best</div>
+        <div class="value" id="best">0</div>
+      </div>
+      <div class="card">
+        <div class="label">Speed</div>
+        <div class="value" id="speed">1x</div>
+      </div>
+    </div>
 
-<div id="hud">Score: 0 | Best: 0</div>
-<canvas id="gameCanvas" width="400" height="600"></canvas>
+    <div class="track" id="track">
+      <div class="lane-divider" id="laneDivider"></div>
+      <div class="paused-badge" id="pausedBadge">Paused</div>
+      <div class="flash" id="flash"></div>
 
-<script>
+      <div class="car" id="player">
+        <div class="wheel w1"></div>
+        <div class="wheel w2"></div>
+        <div class="wheel w3"></div>
+        <div class="wheel w4"></div>
+        <div class="car-body"></div>
+      </div>
 
-// Canvas setup
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+      <div class="overlay" id="overlay">
+        <div class="panel">
+          <h1><span class="accent">Neon</span> Lane Runner</h1>
+          <p>
+            Dodge enemy cars, collect coins, and grab blue boosts for extra speed.
+            Use <strong>← →</strong> or <strong>A D</strong> to move. Press <strong>P</strong> to pause.
+          </p>
+          <button class="btn" id="startBtn">Start Game</button>
+          <div class="tips">Mobile: tap left or right side of the road</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-const hud = document.getElementById("hud");
-const startScreen = document.getElementById("startScreen");
+  <script>
+    const track = document.getElementById('track');
+    const player = document.getElementById('player');
+    const scoreEl = document.getElementById('score');
+    const bestEl = document.getElementById('best');
+    const speedEl = document.getElementById('speed');
+    const overlay = document.getElementById('overlay');
+    const startBtn = document.getElementById('startBtn');
+    const laneDivider = document.getElementById('laneDivider');
+    const flash = document.getElementById('flash');
+    const pausedBadge = document.getElementById('pausedBadge');
 
-let score = 0;
-let bestScore = localStorage.getItem("bestScore") || 0;
-let gameOn = false;
+    const lanes = [0.22, 0.5, 0.78];
+    let laneIndex = 1;
+    let gameRunning = false;
+    let paused = false;
+    let score = 0;
+    let best = Number(localStorage.getItem('neon-lane-best') || 0);
+    let roadOffset = 0;
+    let baseSpeed = 6;
+    let gameSpeed = 6;
+    let spawnTick = 0;
+    let coinTick = 0;
+    let boostTick = 0;
+    let frameId = null;
+    let lastTime = 0;
+    const objects = [];
 
-// Images
-const playerImg = new Image();
-playerImg.src = "car.png";
+    bestEl.textContent = best;
 
-const enemyImg = new Image();
-enemyImg.src = "enemy.png";
-
-// Player
-let player = { x: 170, y: 500, w: 60, h: 120, speed: 6 };
-
-// Enemies
-let enemies = [];
-const enemyCount = 3;
-
-// Control
-const keys = { ArrowLeft: false, ArrowRight: false };
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
-
-// Start
-function startGame() {
-  gameOn = true;
-  score = 0;
-  enemies = [];
-  startScreen.style.display = "none";
-  hud.innerText = `Score: ${score} | Best: ${bestScore}`;
-  for (let i = 0; i < enemyCount; i++) {
-    enemies.push(createEnemy());
-  }
-  requestAnimationFrame(gameLoop);
-}
-
-// Create Enemy
-function createEnemy() {
-  return {
-    x: Math.random() * 340,
-    y: -Math.random() * 600 - 150,
-    w: 60,
-    h: 120,
-    speed: 4 + Math.random() * 3
-  };
-}
-
-// Game Loop
-function gameLoop() {
-  if (!gameOn) return;
-  
-  // Clear
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Move player
-  if (keys.ArrowLeft && player.x > 0) player.x -= player.speed;
-  if (keys.ArrowRight && player.x < 340) player.x += player.speed;
-
-  // Draw player
-  ctx.drawImage(playerImg, player.x, player.y, player.w, player.h);
-
-  // Move & draw enemies
-  enemies.forEach((e, i) => {
-    e.y += e.speed;
-    ctx.drawImage(enemyImg, e.x, e.y, e.w, e.h);
-
-    if (e.y > canvas.height) {
-      enemies[i] = createEnemy();
-      score++;
-      if (score > bestScore) {
-        bestScore = score;
-        localStorage.setItem("bestScore", bestScore);
+    function createDashes() {
+      laneDivider.innerHTML = '';
+      for (let i = 0; i < 10; i++) {
+        const dash = document.createElement('div');
+        dash.className = 'dash';
+        dash.style.top = `${i * 90 - 20}px`;
+        laneDivider.appendChild(dash);
       }
     }
 
-    if (detectCollision(player, e)) {
-      gameOver();
+    function laneLeft(index, width = 78) {
+      const trackWidth = track.clientWidth;
+      return trackWidth * lanes[index] - width / 2;
     }
-  });
 
-  hud.innerText = `Score: ${score} | Best: ${bestScore}`;
-  requestAnimationFrame(gameLoop);
-}
+    function placePlayer() {
+      player.style.left = `${laneLeft(laneIndex, player.offsetWidth)}px`;
+    }
 
-// Collision
-function detectCollision(a, b) {
-  return !(
-    a.y + a.h < b.y ||
-    a.y > b.y + b.h ||
-    a.x + a.w < b.x ||
-    a.x > b.x + b.w
-  );
-}
+    function spawnEnemy() {
+      const enemy = document.createElement('div');
+      enemy.className = 'enemy';
+      enemy.innerHTML = `
+        <div class="wheel w1"></div>
+        <div class="wheel w2"></div>
+        <div class="wheel w3"></div>
+        <div class="wheel w4"></div>
+        <div class="shape"></div>
+      `;
+      const lane = Math.floor(Math.random() * 3);
+      const item = { type: 'enemy', el: enemy, lane, x: laneLeft(lane, 76), y: -140, w: 76, h: 128 };
+      enemy.style.left = `${item.x}px`;
+      enemy.style.top = `${item.y}px`;
+      track.appendChild(enemy);
+      objects.push(item);
+    }
 
-// Game Over
-function gameOver() {
-  gameOn = false;
-  startScreen.innerHTML = `
-    🚗 Game Over<br><br>
-    Score: ${score}<br>
-    Best: ${bestScore}<br><br>
-    <button onclick="startGame()">Restart</button>`;
-  startScreen.style.display = "flex";
-}
+    function spawnCoin() {
+      const coin = document.createElement('div');
+      coin.className = 'coin';
+      const lane = Math.floor(Math.random() * 3);
+      const item = { type: 'coin', el: coin, lane, x: laneLeft(lane, 34), y: -40, w: 34, h: 34 };
+      coin.style.left = `${item.x}px`;
+      coin.style.top = `${item.y}px`;
+      track.appendChild(coin);
+      objects.push(item);
+    }
 
-</script>
+    function spawnBoost() {
+      const boost = document.createElement('div');
+      boost.className = 'boost';
+      const lane = Math.floor(Math.random() * 3);
+      const item = { type: 'boost', el: boost, lane, x: laneLeft(lane, 30), y: -50, w: 30, h: 46 };
+      boost.style.left = `${item.x}px`;
+      boost.style.top = `${item.y}px`;
+      track.appendChild(boost);
+      objects.push(item);
+    }
 
+    function intersects(a, b) {
+      return !(
+        a.x + a.w < b.x ||
+        a.x > b.x + b.w ||
+        a.y + a.h < b.y ||
+        a.y > b.y + b.h
+      );
+    }
+
+    function getPlayerBox() {
+      return {
+        x: laneLeft(laneIndex, player.offsetWidth) + 10,
+        y: track.clientHeight - player.offsetHeight - 24 + 10,
+        w: player.offsetWidth - 20,
+        h: player.offsetHeight - 18
+      };
+    }
+
+    function updateRoad(delta) {
+      roadOffset += gameSpeed * delta * 0.38;
+      [...laneDivider.children].forEach((dash, i) => {
+        const top = ((i * 90 + roadOffset) % 900) - 100;
+        dash.style.top = `${top}px`;
+      });
+    }
+
+    function removeObject(index) {
+      objects[index].el.remove();
+      objects.splice(index, 1);
+    }
+
+    function flashDamage() {
+      flash.classList.add('show');
+      setTimeout(() => flash.classList.remove('show'), 120);
+    }
+
+    function endGame() {
+      gameRunning = false;
+      cancelAnimationFrame(frameId);
+      if (score > best) {
+        best = score;
+        localStorage.setItem('neon-lane-best', String(best));
+        bestEl.textContent = best;
+      }
+      overlay.innerHTML = `
+        <div class="panel">
+          <h1>Game Over</h1>
+          <p>Your score: <strong>${score}</strong><br>Best score: <strong>${best}</strong></p>
+          <button class="btn" id="restartBtn">Play Again</button>
+          <div class="tips">Tip: coin = +5 points, boost = temporary speed bonus</div>
+        </div>
+      `;
+      overlay.style.display = 'grid';
+      document.getElementById('restartBtn').addEventListener('click', startGame);
+    }
+
+    function resetGame() {
+      objects.forEach(obj => obj.el.remove());
+      objects.length = 0;
+      laneIndex = 1;
+      score = 0;
+      baseSpeed = 6;
+      gameSpeed = 6;
+      spawnTick = 0;
+      coinTick = 0;
+      boostTick = 0;
+      roadOffset = 0;
+      paused = false;
+      pausedBadge.classList.remove('show');
+      scoreEl.textContent = '0';
+      speedEl.textContent = '1x';
+      overlay.style.display = 'none';
+      placePlayer();
+    }
+
+    function startGame() {
+      resetGame();
+      gameRunning = true;
+      lastTime = performance.now();
+      frameId = requestAnimationFrame(loop);
+    }
+
+    function addScore(amount) {
+      score += amount;
+      scoreEl.textContent = score;
+      const multiplier = Math.max(1, (gameSpeed / 6)).toFixed(1);
+      speedEl.textContent = `${multiplier}x`;
+    }
+
+    function loop(now) {
+      if (!gameRunning) return;
+      frameId = requestAnimationFrame(loop);
+      if (paused) {
+        lastTime = now;
+        return;
+      }
+
+      const delta = Math.min(1.8, (now - lastTime) / 16.6667);
+      lastTime = now;
+
+      baseSpeed += 0.0025 * delta;
+      if (gameSpeed > baseSpeed) {
+        gameSpeed -= 0.01 * delta;
+      } else {
+        gameSpeed = baseSpeed;
+      }
+
+      updateRoad(delta);
+      addScore(Math.floor(delta));
+
+      spawnTick += delta;
+      coinTick += delta;
+      boostTick += delta;
+
+      if (spawnTick > Math.max(22, 54 - gameSpeed * 3.4)) {
+        spawnEnemy();
+        spawnTick = 0;
+      }
+      if (coinTick > 75) {
+        spawnCoin();
+        coinTick = 0;
+      }
+      if (boostTick > 210) {
+        spawnBoost();
+        boostTick = 0;
+      }
+
+      const playerBox = getPlayerBox();
+
+      for (let i = objects.length - 1; i >= 0; i--) {
+        const obj = objects[i];
+        const speedFactor = obj.type === 'coin' ? gameSpeed * 0.75 : obj.type === 'boost' ? gameSpeed * 0.82 : gameSpeed;
+        obj.y += speedFactor * delta;
+        obj.el.style.top = `${obj.y}px`;
+
+        const box = { x: obj.x + 4, y: obj.y + 4, w: obj.w - 8, h: obj.h - 8 };
+
+        if (intersects(playerBox, box)) {
+          if (obj.type === 'enemy') {
+            flashDamage();
+            endGame();
+            return;
+          }
+          if (obj.type === 'coin') {
+            addScore(5);
+            removeObject(i);
+            continue;
+          }
+          if (obj.type === 'boost') {
+            gameSpeed += 2.4;
+            addScore(10);
+            removeObject(i);
+            continue;
+          }
+        }
+
+        if (obj.y > track.clientHeight + 60) {
+          removeObject(i);
+        }
+      }
+    }
+
+    function moveLeft() {
+      if (!gameRunning || paused) return;
+      laneIndex = Math.max(0, laneIndex - 1);
+      placePlayer();
+    }
+
+    function moveRight() {
+      if (!gameRunning || paused) return;
+      laneIndex = Math.min(2, laneIndex + 1);
+      placePlayer();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+      if (key === 'arrowleft' || key === 'a') moveLeft();
+      if (key === 'arrowright' || key === 'd') moveRight();
+      if (key === 'p' && gameRunning) {
+        paused = !paused;
+        pausedBadge.classList.toggle('show', paused);
+      }
+      if (key === 'enter' && !gameRunning && overlay.style.display !== 'none') {
+        startGame();
+      }
+    });
+
+    track.addEventListener('click', (e) => {
+      if (!gameRunning || paused) return;
+      const rect = track.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      if (x < rect.width / 2) moveLeft();
+      else moveRight();
+    });
+
+    window.addEventListener('resize', () => {
+      placePlayer();
+      objects.forEach(obj => {
+        obj.x = laneLeft(obj.lane, obj.w);
+        obj.el.style.left = `${obj.x}px`;
+      });
+      createDashes();
+    });
+
+    createDashes();
+    placePlayer();
+    startBtn.addEventListener('click', startGame);
+  </script>
 </body>
 </html>
